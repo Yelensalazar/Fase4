@@ -131,7 +131,6 @@ class Servicio(Entidad, ABC):
     def describir(self):
         pass
 
-
 # Servicio concreto 1: reserva de salas. Sobrescribe cálculo y descripción.
 class ReservaSala(Servicio):
     def calcular_costo(self, duracion, descuento=0, impuesto=0):
