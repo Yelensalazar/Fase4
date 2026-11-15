@@ -162,6 +162,33 @@ class Asesoria(Servicio):
     def describir(self):
         return f"Asesoría especializada: {self.nombre} (${self.tarifa:.2f}/hora)"
 
+# --------------------------- SOBRECARGA SIMULADA ----------------------------
+# Python no permite sobrecarga clásica por firma. Se implementan variantes
+# mediante argumentos opcionales y un método alternativo explícito.
+# Calcula el valor final: primero aplica descuento y luego impuesto.\n# Los parámetros opcionales permiten distintas formas de cálculo (sobrecarga simulada).
+def costo_final(subtotal, descuento=0, impuesto=0):
+    if not 0 <= descuento <= 100:
+        raise ValidationError("El descuento debe estar entre 0 y 100%.")
+    if not 0 <= impuesto <= 100:
+        raise ValidationError("El impuesto debe estar entre 0 y 100%.")
+    base = subtotal * (1 - descuento / 100)
+    return round(base * (1 + impuesto / 100), 2)
+
+
+# Variante sencilla: costo sin descuento ni impuesto.
+def calcular_costo_simple(servicio, duracion):
+    """Variante 1: costo sin descuento ni impuesto."""
+    return servicio.calcular_costo(duracion)
+
+
+# Variante detallada: recibe descuento e impuesto.
+def calcular_costo_detallado(servicio, duracion, descuento, impuesto):
+    """Variante 2: costo con descuento e impuesto."""
+    return servicio.calcular_costo(duracion, descuento, impuesto)
+
+
+
+
 
 
 
