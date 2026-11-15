@@ -39,7 +39,6 @@ class OperationError(SoftwareFJError):
 class AvailabilityError(SoftwareFJError):
     """Servicio no disponible."""
 
-
 # --------------------------- ABSTRACCIÓN -------------------------------------
 # CLASE ABSTRACTA: define características comunes para Cliente, Servicio y Reserva.
 # ABC impide crear directamente objetos Entidad.
@@ -56,3 +55,6 @@ class Entidad(ABC):
     @abstractmethod
     def describir(self):
         """Cada entidad concreta debe describirse."""
+
+
+
