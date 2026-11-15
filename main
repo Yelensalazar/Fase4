@@ -1,0 +1,5 @@
+# ABC permite crear clases abstractas; abstractmethod obliga a implementar métodos en las clases hijas.
+from abc import ABC, abstractmethod
+
+# logging registra eventos, advertencias y errores en un archivo de texto.
+import logging
