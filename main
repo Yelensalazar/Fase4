@@ -56,5 +56,44 @@ class Entidad(ABC):
     def describir(self):
         """Cada entidad concreta debe describirse."""
 
+# --------------------------- CLIENTE ----------------------------------------
+# Cliente hereda el identificador de Entidad y agrega datos personales encapsulados.
+class Cliente(Entidad):
+    def __init__(self, identificador, nombre, correo, telefono):
+        super().__init__(identificador)
+        # Los atributos con doble guion bajo son privados (encapsulación).
+        self.__nombre = self._validar_texto(nombre, "nombre")
+        self.__correo = self._validar_correo(correo)
+        self.__telefono = self._validar_texto(telefono, "teléfono")
+
+    @staticmethod
+    def _validar_texto(valor, campo):
+        if not isinstance(valor, str) or len(valor.strip()) < 2:
+            raise ValidationError(f"El {campo} debe contener al menos 2 caracteres.")
+        return valor.strip()
+
+    @staticmethod
+    def _validar_correo(correo):
+        if not isinstance(correo, str) or "@" not in correo or "." not in correo.split("@")[-1]:
+            raise ValidationError("El correo electrónico no tiene un formato válido.")
+        return correo.strip().lower()
+
+    @property
+    def nombre(self):
+        return self.__nombre
+
+    @property
+    def correo(self):
+        return self.__correo
+
+    @property
+    def telefono(self):
+        return self.__telefono
+
+    def describir(self):
+        return f"Cliente {self.id}: {self.nombre} | {self.correo} | {self.telefono}"
+
+
+
 
 
