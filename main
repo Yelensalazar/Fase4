@@ -12,3 +12,47 @@ logging.basicConfig(
     encoding="utf-8"
 )
 logger = logging.getLogger("SoftwareFJ")
+
+
+# --------------------------- EXCEPCIONES PERSONALIZADAS ----------------------
+# Excepción general de la aplicación. Las demás excepciones heredan de ella.
+class SoftwareFJError(Exception):
+    """Excepción base del sistema."""
+
+
+# Se lanza cuando un dato no cumple las reglas de validación.
+class ValidationError(SoftwareFJError):
+    """Datos de entrada inválidos."""
+
+
+# Se utiliza cuando se busca un cliente o servicio que no existe.
+class NotFoundError(SoftwareFJError):
+    """Objeto solicitado no encontrado."""
+
+
+# Representa una acción que no puede ejecutarse por el estado actual.
+class OperationError(SoftwareFJError):
+    """Operación no permitida según el estado."""
+
+
+# Indica que un servicio está marcado como no disponible.
+class AvailabilityError(SoftwareFJError):
+    """Servicio no disponible."""
+
+
+# --------------------------- ABSTRACCIÓN -------------------------------------
+# CLASE ABSTRACTA: define características comunes para Cliente, Servicio y Reserva.
+# ABC impide crear directamente objetos Entidad.
+class Entidad(ABC):
+    def __init__(self, identificador):
+        if not str(identificador).strip():
+            raise ValidationError("El identificador no puede estar vacío.")
+        self._id = str(identificador).strip()
+
+    @property
+    def id(self):
+        return self._id
+
+    @abstractmethod
+    def describir(self):
+        """Cada entidad concreta debe describirse."""
