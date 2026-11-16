@@ -311,6 +311,58 @@ def ejecutar_demostracion():
         finally:
             print(f"Operación {operaciones} finalizada.")
 
+# 1 y 2: clientes válido e inválido
+    ejecutar("Registrar cliente válido",
+             lambda: sistema.registrar_cliente(Cliente("C01", "Ana Pérez", "ana@mail.com", "3001234567")))
+    ejecutar("Registrar cliente inválido",
+             lambda: sistema.registrar_cliente(Cliente("C02", "A", "correo-invalido", "3")))
+
+    # 3 y 4: servicios correctos e incorrectos
+    ejecutar("Crear servicio sala",
+             lambda: sistema.registrar_servicio(ReservaSala("S01", "Sala de reuniones", 50000)))
+    ejecutar("Crear servicio equipo",
+             lambda: sistema.registrar_servicio(AlquilerEquipo("S02", "Proyector", 30000)))
+    ejecutar("Crear servicio asesoría",
+             lambda: sistema.registrar_servicio(Asesoria("S03", "Asesoría técnica", 80000)))
+    ejecutar("Crear servicio con tarifa inválida",
+             lambda: sistema.registrar_servicio(Asesoria("S04", "Asesoría inválida", -10)))
+
+    # 7: reserva exitosa, confirmación y procesamiento
+    reserva_ok = {}
+    def crear_y_confirmar():
+        r = sistema.crear_reserva("R01", "C01", "S01", 2)
+        reserva_ok["r"] = r
+        r.confirmar(descuento=10, impuesto=19)
+        return f"Costo ${r.costo}"
+    ejecutar("Reserva exitosa", crear_y_confirmar)
+    ejecutar("Procesar reserva confirmada", lambda: reserva_ok["r"].procesar())
+
+    # 9 y 10: reserva fallida y operación no permitida
+    ejecutar("Reserva con cliente inexistente",
+             lambda: sistema.crear_reserva("R02", "C99", "S01", 1))
+    ejecutar("Procesar reserva pendiente",
+             lambda: sistema.crear_reserva("R03", "C01", "S02", 1).procesar())
+
+    # 11: servicio no disponible
+    ejecutar("Reserva de servicio no disponible",
+             lambda: Reserva("R04", sistema.clientes[0],
+                            Asesoria("S05", "No disponible", 50000, False), 1))
+
+    # 12: parámetros/cálculo inconsistentes
+    ejecutar("Duración inválida",
+             lambda: sistema.crear_reserva("R05", "C01", "S01", 0))
+    ejecutar("Descuento inválido",
+             lambda: calcular_costo_detallado(sistema.servicios[0], 1, 150, 19))
+
+    # 13: cancelar una reserva
+    ejecutar("Cancelar reserva",
+             lambda: reserva_ok["r"].cancelar())
+
+    sistema.listar()
+    print(f"\\nDemostración terminada: {operaciones} operaciones ejecutadas.")
+    print("Los eventos y errores se guardaron en software_fj.log.")
+
+
     
 
 
