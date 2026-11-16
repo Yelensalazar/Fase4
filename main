@@ -362,6 +362,9 @@ def ejecutar_demostracion():
     print(f"\\nDemostración terminada: {operaciones} operaciones ejecutadas.")
     print("Los eventos y errores se guardaron en software_fj.log.")
 
+# Este bloque solo se ejecuta cuando el archivo se inicia directamente.
+if __name__ == "__main__":
+    ejecutar_demostracion()
 
     
 
