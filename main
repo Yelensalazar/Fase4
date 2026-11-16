@@ -286,8 +286,32 @@ class SistemaSoftwareFJ:
         for r in self.reservas: print(r.describir())
 
 
+# --------------------------- DEMOSTRACIÓN (10+ OPERACIONES) ------------------
+# Ejecuta casos válidos e inválidos para demostrar que el programa continúa.
+def ejecutar_demostracion():
+    sistema = SistemaSoftwareFJ()
+    print("SISTEMA INTEGRAL SOFTWARE FJ\\n")
+    operaciones = 0
 
+    # Función auxiliar: cada acción se ejecuta con control de excepciones.
+    def ejecutar(etiqueta, accion):
+        nonlocal operaciones
+        operaciones += 1
+        try:
+            resultado = accion()
+        except SoftwareFJError as exc:
+            logger.error("%s: %s", etiqueta, exc, exc_info=True)
+            print(f"[ERROR CONTROLADO] {etiqueta}: {exc}")
+        except Exception as exc:
+            # Captura de último recurso: evita que un error inesperado cierre la app.
+            logger.critical("%s: error inesperado", etiqueta, exc_info=True)
+            print(f"[ERROR INESPERADO CONTROLADO] {etiqueta}: {exc}")
+        else:
+            print(f"[OK] {etiqueta}" + (f" -> {resultado}" if resultado is not None else ""))
+        finally:
+            print(f"Operación {operaciones} finalizada.")
 
+    
 
 
 
