@@ -242,6 +242,49 @@ class Reserva(Entidad):
                 f"Servicio: {self._servicio.nombre} | Duración: {self._duracion} | "
                 f"Estado: {self.estado} | Costo: {self._costo}")
 
+# --------------------------- GESTOR EN MEMORIA ------------------------------
+# Gestor principal: mantiene listas en memoria, sin base de datos.
+class SistemaSoftwareFJ:
+    def __init__(self):
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+
+    # Registra clientes y evita identificadores repetidos.
+    def registrar_cliente(self, cliente):
+        if any(c.id == cliente.id for c in self.clientes):
+            raise ValidationError(f"Ya existe el cliente con ID {cliente.id}.")
+        self.clientes.append(cliente)
+        logger.info("Cliente registrado: %s", cliente.id)
+
+    # Registra servicios y evita identificadores repetidos.
+    def registrar_servicio(self, servicio):
+        if any(s.id == servicio.id for s in self.servicios):
+            raise ValidationError(f"Ya existe el servicio con ID {servicio.id}.")
+        self.servicios.append(servicio)
+        logger.info("Servicio registrado: %s", servicio.id)
+
+    # Busca cliente y servicio en las listas; si existen, crea la reserva.
+    def crear_reserva(self, identificador, id_cliente, id_servicio, duracion):
+        cliente = next((c for c in self.clientes if c.id == str(id_cliente)), None)
+        servicio = next((s for s in self.servicios if s.id == str(id_servicio)), None)
+        if cliente is None:
+            raise NotFoundError(f"No existe el cliente {id_cliente}.")
+        if servicio is None:
+            raise NotFoundError(f"No existe el servicio {id_servicio}.")
+        reserva = Reserva(identificador, cliente, servicio, duracion)
+        self.reservas.append(reserva)
+        logger.info("Reserva creada: %s", reserva.id)
+        return reserva
+
+    def listar(self):
+        print("\\n--- CLIENTES ---")
+        for c in self.clientes: print(c.describir())
+        print("\\n--- SERVICIOS ---")
+        for s in self.servicios: print(s.describir())
+        print("\\n--- RESERVAS ---")
+        for r in self.reservas: print(r.describir())
+
 
 
 
