@@ -138,8 +138,8 @@ class Servicio(Entidad, ABC):
         super().__init__(identificador)
         if not isinstance(tarifa, (int, float)) or tarifa <= 0:
             raise ValidationError("La tarifa debe ser un número positivo.")
-        self._nombre = Cliente._validar_texto(nombre, "nombre del servicio")
-        self._tarifa = float(tarifa)
+        elf._nombre =validar_texto(nombre, "nombre del servicio")
+        self._tarifa = validar_numero(tarifa,"tarifa")
         self._disponible = bool(disponible)
 
     @property
