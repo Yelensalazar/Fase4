@@ -207,12 +207,19 @@ class Asesoria(Servicio):
 # mediante argumentos opcionales y un método alternativo explícito.
 # Calcula el valor final: primero aplica descuento y luego impuesto.\n# Los parámetros opcionales permiten distintas formas de cálculo (sobrecarga simulada).
 def costo_final(subtotal, descuento=0, impuesto=0):
-    if not 0 <= descuento <= 100:
-        raise ValidationError("El descuento debe estar entre 0 y 100%.")
-    if not 0 <= impuesto <= 100:
-        raise ValidationError("El impuesto debe estar entre 0 y 100%.")
+
+    subtotal = validar_numero(subtotal, "subtotal")
+    descuento = validar_porcentaje(descuento, "descuento")
+    impuesto = validar_porcentaje(impuesto, "impuesto")
+
     base = subtotal * (1 - descuento / 100)
-    return round(base * (1 + impuesto / 100), 2)
+
+    total = base * (1 + impuesto / 100)
+
+    if not math.isfinite(total):
+        raise ValidationError("El resultado del cálculo no es válido.")
+
+    return round(total, 2)
 
 
 # Variante sencilla: costo sin descuento ni impuesto.
