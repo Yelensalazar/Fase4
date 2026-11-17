@@ -4,6 +4,9 @@ from abc import ABC, abstractmethod
 # logging registra eventos, advertencias y errores en un archivo de texto.
 import logging
 
+# math permite comprobar que los valores numéricos sean finitos.
+import math
+
 # Registro persistente de eventos y errores (no es almacenamiento de datos).
 # Configuración del log: se guarda en software_fj.log, con fecha, nivel y mensaje.
 logging.basicConfig(
