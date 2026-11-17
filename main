@@ -154,12 +154,14 @@ class Servicio(Entidad, ABC):
     def disponible(self):
         return self._disponible
 
-    # Comprueba duración y disponibilidad antes de calcular o reservar.
+    # Comprueba la duración y disponibilidad antes de calcular o reservar.
     def validar_parametros(self, duracion):
-        if not isinstance(duracion, (int, float)) or duracion <= 0:
-            raise ValidationError("La duración debe ser un número positivo.")
+        validar_numero(duracion, "duración")
+
         if not self.disponible:
-            raise AvailabilityError(f"El servicio '{self.nombre}' no está disponible.")
+            raise AvailabilityError(
+                f"El servicio '{self.nombre}' no está disponible."
+        )
 
     @abstractmethod
     def calcular_costo(self, duracion, descuento=0, impuesto=0):
