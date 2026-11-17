@@ -140,8 +140,14 @@ class Servicio(Entidad, ABC):
             raise ValidationError("La tarifa debe ser un número positivo.")
         elf._nombre =validar_texto(nombre, "nombre del servicio")
         self._tarifa = validar_numero(tarifa,"tarifa")
-        self._disponible = bool(disponible)
+        if not isinstance(disponible, bool):
+            raise ValidationError(
+                 "La disponibilidad debe ser un valor booleano."
+    )
 
+        self._disponible = disponible
+        self._nombre = validar_texto(nombre, "nombre del servicio")
+        self._tarifa = validar_numero(tarifa, "tarifa")
     @property
     def nombre(self):
         return self._nombre
