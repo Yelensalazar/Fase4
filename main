@@ -12,6 +12,30 @@ logging.basicConfig(
     encoding="utf-8"
 )
 logger = logging.getLogger("SoftwareFJ")
+# --------------------------- FUNCIONES DE VALIDACIÓN -------------------------
+
+# Valida textos que deben contener al menos dos caracteres.
+def validar_texto(valor, campo):
+    if not isinstance(valor, str) or len(valor.strip()) < 2:
+        raise ValidationError(
+            f"El {campo} debe contener al menos 2 caracteres."
+        )
+    return valor.strip()
+
+
+# Comprueba que un valor sea numérico, finito y del tipo esperado.
+def validar_numero(valor, campo, permitir_cero=False):
+    if (
+        isinstance(valor, bool)
+        or not isinstance(valor, (int, float))
+        or not math.isfinite(valor)
+        or (valor < 0 if permitir_cero else valor <= 0)
+    ):
+        condicion = "no negativo" if permitir_cero else "positivo"
+        raise ValidationError(
+            f"El valor de {campo} debe ser un número {condicion} y válido."
+        )
+    return float(valor)
 
 
 # --------------------------- EXCEPCIONES PERSONALIZADAS ----------------------
