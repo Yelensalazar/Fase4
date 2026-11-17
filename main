@@ -26,6 +26,7 @@ def validar_texto(valor, campo):
     return valor.strip()
 
 
+
 # Comprueba que un valor sea numérico, finito y del tipo esperado.
 def validar_numero(valor, campo, permitir_cero=False):
     if (
@@ -39,6 +40,16 @@ def validar_numero(valor, campo, permitir_cero=False):
             f"El valor de {campo} debe ser un número {condicion} y válido."
         )
     return float(valor)
+
+def validar_porcentaje(valor, campo):
+    numero = validar_numero(valor, campo, permitir_cero=True)
+
+    if numero > 100:
+        raise ValidationError(
+            f"El {campo} debe estar entre 0 y 100."
+        )
+
+    return numero
 
 
 # --------------------------- EXCEPCIONES PERSONALIZADAS ----------------------
