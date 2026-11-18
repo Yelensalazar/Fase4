@@ -363,18 +363,34 @@ def calcular_costo_detallado(servicio, duracion, descuento, impuesto):
 # --------------------------- RESERVA ----------------------------------------
 # Reserva relaciona un Cliente con un Servicio, duración, estado y costo.
 class Reserva(Entidad):
-    ESTADOS = ("Pendiente", "Confirmada", "Cancelada")
+    """Relaciona un cliente con un servicio y administra su estado."""
+
+    ESTADOS = (
+        "Pendiente",
+        "Confirmada",
+        "Cancelada",
+        "Procesada"
+    )
 
     def __init__(self, identificador, cliente, servicio, duracion):
+
         super().__init__(identificador)
+
         if not isinstance(cliente, Cliente):
-            raise ValidationError("La reserva requiere un cliente válido.")
+            raise ValidationError(
+                "La reserva requiere un cliente válido."
+            )
+
         if not isinstance(servicio, Servicio):
-            raise ValidationError("La reserva requiere un servicio válido.")
+            raise ValidationError(
+                "La reserva requiere un servicio válido."
+            )
+
         servicio.validar_parametros(duracion)
+
         self._cliente = cliente
         self._servicio = servicio
-        self._duracion = duracion
+        self._duracion = validar_numero(duracion, "duración")
         self._estado = "Pendiente"
         self._costo = None
 
@@ -385,36 +401,95 @@ class Reserva(Entidad):
     @property
     def costo(self):
         return self._costo
-
-    # Confirma una reserva pendiente y calcula su costo.
+    
+# Confirma una reserva pendiente y calcula su costo.
     def confirmar(self, descuento=0, impuesto=0):
+        """Confirma una reserva pendiente y calcula su costo."""
+
         if self._estado != "Pendiente":
-            raise OperationError("Solo se puede confirmar una reserva pendiente.")
+            raise OperationError(
+                "Solo se puede confirmar una reserva pendiente."
+            )
+
         try:
-            self._costo = self._servicio.calcular_costo(self._duracion, descuento, impuesto)
+            self._costo = self._servicio.calcular_costo(
+                self._duracion,
+                descuento,
+                impuesto
+            )
+
         except (ValidationError, AvailabilityError) as exc:
-            raise OperationError("No fue posible calcular/confirmar la reserva.") from exc
+
+            logger.error(
+                "Error al confirmar reserva %s: %s",
+                self.id,
+                exc,
+                exc_info=True
+            )
+
+            raise OperationError(
+                "No fue posible calcular o confirmar la reserva."
+            ) from exc
+
         else:
             self._estado = "Confirmada"
-            logger.info("Reserva %s confirmada. Costo=%s", self.id, self._costo)
+
+            logger.info(
+                "Reserva %s confirmada. Costo=%s",
+                self.id,
+                self._costo
+            )
+
         finally:
-            logger.info("Proceso de confirmación finalizado para reserva %s", self.id)
+            logger.info(
+                "Proceso de confirmación finalizado para reserva %s",
+                self.id
+            )
 
     def cancelar(self):
+        """Cancela una reserva pendiente o confirmada."""
+
         if self._estado == "Cancelada":
-            raise OperationError("La reserva ya está cancelada.")
+            raise OperationError(
+                "La reserva ya está cancelada."
+            )
+
+        if self._estado == "Procesada":
+            raise OperationError(
+                "No se puede cancelar una reserva que ya fue procesada."
+            )
+
         self._estado = "Cancelada"
+
         logger.info("Reserva %s cancelada.", self.id)
 
     def procesar(self):
+        """Procesa una reserva que haya sido confirmada."""
+
         if self._estado != "Confirmada":
-            raise OperationError("La reserva debe estar confirmada para procesarse.")
+            raise OperationError(
+                "La reserva debe estar confirmada para procesarse."
+            )
+
+        self._estado = "Procesada"
+
+        logger.info(
+            "Reserva %s procesada correctamente.",
+            self.id
+        )
+
         return f"Reserva {self.id} procesada correctamente."
 
     def describir(self):
-        return (f"Reserva {self.id} | Cliente: {self._cliente.nombre} | "
-                f"Servicio: {self._servicio.nombre} | Duración: {self._duracion} | "
-                f"Estado: {self.estado} | Costo: {self._costo}")
+
+        return (
+            f"Reserva {self.id} | "
+            f"Cliente: {self._cliente.nombre} | "
+            f"Servicio: {self._servicio.nombre} | "
+            f"Duración: {self._duracion} | "
+            f"Estado: {self.estado} | "
+            f"Costo: {self._costo}"
+        )
 
 # --------------------------- GESTOR EN MEMORIA ------------------------------
 # Gestor principal: mantiene listas en memoria, sin base de datos.
