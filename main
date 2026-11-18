@@ -612,87 +612,277 @@ class SistemaSoftwareFJ:
 # --------------------------- DEMOSTRACIÓN (10+ OPERACIONES) ------------------
 # Ejecuta casos válidos e inválidos para demostrar que el programa continúa.
 def ejecutar_demostracion():
+
+
     sistema = SistemaSoftwareFJ()
-    print("SISTEMA INTEGRAL SOFTWARE FJ\\n")
+
+    print("SISTEMA INTEGRAL SOFTWARE FJ\n")
+
     operaciones = 0
 
     # Función auxiliar: cada acción se ejecuta con control de excepciones.
     def ejecutar(etiqueta, accion):
+
         nonlocal operaciones
         operaciones += 1
+
         try:
             resultado = accion()
+
         except SoftwareFJError as exc:
-            logger.error("%s: %s", etiqueta, exc, exc_info=True)
-            print(f"[ERROR CONTROLADO] {etiqueta}: {exc}")
+
+            logger.error(
+                "%s: %s",
+                etiqueta,
+                exc,
+                exc_info=True
+            )
+
+            print(
+                f"[ERROR CONTROLADO] {etiqueta}: {exc}"
+            )
+
         except Exception as exc:
-            # Captura de último recurso: evita que un error inesperado cierre la app.
-            logger.critical("%s: error inesperado", etiqueta, exc_info=True)
-            print(f"[ERROR INESPERADO CONTROLADO] {etiqueta}: {exc}")
+
+            logger.critical(
+                "%s: error inesperado",
+                etiqueta,
+                exc_info=True
+            )
+
+            print(
+                f"[ERROR INESPERADO CONTROLADO] {etiqueta}: {exc}"
+            )
+
         else:
-            print(f"[OK] {etiqueta}" + (f" -> {resultado}" if resultado is not None else ""))
+
+            mensaje = (
+                f" -> {resultado}"
+                if resultado is not None
+                else ""
+            )
+
+            print(f"[OK] {etiqueta}{mensaje}")
+
         finally:
             print(f"Operación {operaciones} finalizada.")
 
-# 1 y 2: clientes válido e inválido
-    ejecutar("Registrar cliente válido",
-             lambda: sistema.registrar_cliente(Cliente("C01", "Ana Pérez", "ana@mail.com", "3001234567")))
-    ejecutar("Registrar cliente inválido",
-             lambda: sistema.registrar_cliente(Cliente("C02", "A", "correo-invalido", "3")))
+    # 1. Registrar un cliente válido.
+    ejecutar(
+        "Registrar cliente válido",
+        lambda: sistema.registrar_cliente(
+            Cliente(
+                "C01",
+                "Ana Pérez",
+                "ana@mail.com",
+                "3001234567"
+            )
+        )
+    )
 
-    # 3 y 4: servicios correctos e incorrectos
-    ejecutar("Crear servicio sala",
-             lambda: sistema.registrar_servicio(ReservaSala("S01", "Sala de reuniones", 50000)))
-    ejecutar("Crear servicio equipo",
-             lambda: sistema.registrar_servicio(AlquilerEquipo("S02", "Proyector", 30000)))
-    ejecutar("Crear servicio asesoría",
-             lambda: sistema.registrar_servicio(Asesoria("S03", "Asesoría técnica", 80000)))
-    ejecutar("Crear servicio con tarifa inválida",
-             lambda: sistema.registrar_servicio(Asesoria("S04", "Asesoría inválida", -10)))
+    # 2. Intentar registrar un cliente con datos inválidos.
+    ejecutar(
+        "Registrar cliente inválido",
+        lambda: sistema.registrar_cliente(
+            Cliente(
+                "C02",
+                "A",
+                "correo-invalido",
+                "3"
+            )
+        )
+    )
 
-    # 7: reserva exitosa, confirmación y procesamiento
+    # 3. Registrar un servicio de sala.
+    ejecutar(
+        "Crear servicio sala",
+        lambda: sistema.registrar_servicio(
+            ReservaSala(
+                "S01",
+                "Sala de reuniones",
+                50000
+            )
+        )
+    )
+
+    # 4. Registrar un servicio de alquiler de equipo.
+    ejecutar(
+        "Crear servicio equipo",
+        lambda: sistema.registrar_servicio(
+            AlquilerEquipo(
+                "S02",
+                "Proyector",
+                30000
+            )
+        )
+    )
+
+    # 5. Registrar un servicio de asesoría.
+    ejecutar(
+        "Crear servicio asesoría",
+        lambda: sistema.registrar_servicio(
+            Asesoria(
+                "S03",
+                "Asesoría técnica",
+                80000
+            )
+        )
+    )
+
+    # 6. Intentar crear un servicio con tarifa inválida.
+    ejecutar(
+        "Crear servicio con tarifa inválida",
+        lambda: sistema.registrar_servicio(
+            Asesoria(
+                "S04",
+                "Asesoría inválida",
+                -10
+            )
+        )
+    )
+
+    # 7. Crear y confirmar una reserva.
     reserva_ok = {}
+
     def crear_y_confirmar():
-        r = sistema.crear_reserva("R01", "C01", "S01", 2)
+
+        r = sistema.crear_reserva(
+            "R01",
+            "C01",
+            "S01",
+            2
+        )
+
         reserva_ok["r"] = r
-        r.confirmar(descuento=10, impuesto=19)
+
+        r.confirmar(
+            descuento=10,
+            impuesto=19
+        )
+
         return f"Costo ${r.costo}"
-    ejecutar("Reserva exitosa", crear_y_confirmar)
-    ejecutar("Procesar reserva confirmada", lambda: reserva_ok["r"].procesar())
 
-    # 9 y 10: reserva fallida y operación no permitida
-    ejecutar("Reserva con cliente inexistente",
-             lambda: sistema.crear_reserva("R02", "C99", "S01", 1))
-    ejecutar("Procesar reserva pendiente",
-             lambda: sistema.crear_reserva("R03", "C01", "S02", 1).procesar())
+    ejecutar(
+        "Crear y confirmar reserva",
+        crear_y_confirmar
+    )
 
-    # 11: servicio no disponible
-    ejecutar("Reserva de servicio no disponible",
-             lambda: Reserva("R04", sistema.clientes[0],
-                            Asesoria("S05", "No disponible", 50000, False), 1))
+    # 8. Procesar la reserva confirmada.
+    ejecutar(
+        "Procesar reserva confirmada",
+        lambda: reserva_ok["r"].procesar()
+    )
 
-    # 12: parámetros/cálculo inconsistentes
-    ejecutar("Duración inválida",
-             lambda: sistema.crear_reserva("R05", "C01", "S01", 0))
-    ejecutar("Descuento inválido",
-             lambda: calcular_costo_detallado(sistema.servicios[0], 1, 150, 19))
+    # 9. Intentar crear una reserva con cliente inexistente.
+    ejecutar(
+        "Reserva con cliente inexistente",
+        lambda: sistema.crear_reserva(
+            "R02",
+            "C99",
+            "S01",
+            1
+        )
+    )
 
-    # 13: cancelar una reserva
-    ejecutar("Cancelar reserva",
-             lambda: reserva_ok["r"].cancelar())
+    # 10. Intentar procesar una reserva pendiente.
+    ejecutar(
+        "Procesar reserva pendiente",
+        lambda: sistema.crear_reserva(
+            "R03",
+            "C01",
+            "S02",
+            1
+        ).procesar()
+    )
 
+    # 11. Intentar reservar un servicio no disponible.
+    ejecutar(
+        "Reserva de servicio no disponible",
+        lambda: Reserva(
+            "R04",
+            sistema.clientes[0],
+            Asesoria(
+                "S05",
+                "No disponible",
+                50000,
+                False
+            ),
+            1
+        )
+    )
+
+    # 12. Intentar crear una reserva con duración inválida.
+    ejecutar(
+        "Duración inválida",
+        lambda: sistema.crear_reserva(
+            "R05",
+            "C01",
+            "S01",
+            0
+        )
+    )
+
+    # 13. Intentar calcular un costo con descuento inválido.
+    ejecutar(
+        "Descuento inválido",
+        lambda: calcular_costo_detallado(
+            sistema.servicios[0],
+            1,
+            150,
+            19
+        )
+    )
+
+    # 14. Intentar cancelar una reserva que ya fue procesada.
+    ejecutar(
+        "Intentar cancelar reserva procesada",
+        lambda: reserva_ok["r"].cancelar()
+    )
+
+    # 15. Crear una reserva independiente para cancelarla.
+    reserva_cancelable = {}
+
+    def crear_reserva_cancelable():
+
+        r = sistema.crear_reserva(
+            "R06",
+            "C01",
+            "S02",
+            1
+        )
+
+        reserva_cancelable["r"] = r
+
+        return r.id
+
+    ejecutar(
+        "Crear reserva para cancelar",
+        crear_reserva_cancelable
+    )
+
+    # 16. Cancelar la reserva que se encuentra pendiente.
+    ejecutar(
+        "Cancelar reserva pendiente",
+        lambda: reserva_cancelable["r"].cancelar()
+    )
+
+    # Mostrar los registros del sistema.
     sistema.listar()
-    print(f"\\nDemostración terminada: {operaciones} operaciones ejecutadas.")
-    print("Los eventos y errores se guardaron en software_fj.log.")
 
-# Este bloque solo se ejecuta cuando el archivo se inicia directamente.
+    print(
+        f"\nDemostración terminada: "
+        f"{operaciones} operaciones ejecutadas."
+    )
+
+    print(
+        "Los eventos y errores se guardaron en software_fj.log."
+    )
+
+
+# --------------------------- PUNTO DE ENTRADA --------------------------------
+
 if __name__ == "__main__":
     ejecutar_demostracion()
-
-    
-
-
-
 
 
 
