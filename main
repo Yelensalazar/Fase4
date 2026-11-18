@@ -222,20 +222,22 @@ class Cliente(Entidad):
 # --------------------------- SERVICIOS --------------------------------------
 # Servicio es abstracta: establece una estructura común para los tipos de servicio.
 class Servicio(Entidad, ABC):
-    def __init__(self, identificador, nombre, tarifa, disponible=True):
-        super().__init__(identificador)
-        if not isinstance(tarifa, (int, float)) or tarifa <= 0:
-            raise ValidationError("La tarifa debe ser un número positivo.")
-        elf._nombre =validar_texto(nombre, "nombre del servicio")
-        self._tarifa = validar_numero(tarifa,"tarifa")
-        if not isinstance(disponible, bool):
-            raise ValidationError(
-                 "La disponibilidad debe ser un valor booleano."
-    )
+    
 
-        self._disponible = disponible
+    def __init__(self, identificador, nombre, tarifa, disponible=True):
+
+        super().__init__(identificador)
+
         self._nombre = validar_texto(nombre, "nombre del servicio")
         self._tarifa = validar_numero(tarifa, "tarifa")
+
+        if not isinstance(disponible, bool):
+            raise ValidationError(
+                "La disponibilidad debe ser un valor booleano."
+            )
+
+        self._disponible = disponible
+
     @property
     def nombre(self):
         return self._nombre
@@ -248,53 +250,84 @@ class Servicio(Entidad, ABC):
     def disponible(self):
         return self._disponible
 
-    # Comprueba la duración y disponibilidad antes de calcular o reservar.
     def validar_parametros(self, duracion):
+        """Comprueba la duración y disponibilidad del servicio."""
+
         validar_numero(duracion, "duración")
 
         if not self.disponible:
             raise AvailabilityError(
                 f"El servicio '{self.nombre}' no está disponible."
+            )
+
+    @abstractmethod
+    def calcular_costo(self, duracion, descuento=0, impuesto=0):
+        pass
+
+    @abstractmethod
+    def describir(self):
+        pass
+
+
+class ReservaSala(Servicio):
+    """Servicio de reserva de salas por hora."""
+
+    def calcular_costo(self, duracion, descuento=0, impuesto=0):
+
+        self.validar_parametros(duracion)
+
+        return costo_final(
+            self.tarifa * duracion,
+            descuento,
+            impuesto
         )
 
-    @abstractmethod
-    def calcular_costo(self, duracion, descuento=0, impuesto=0):
-        pass
-
-    @abstractmethod
     def describir(self):
-        pass
-
-# Servicio concreto 1: reserva de salas. Sobrescribe cálculo y descripción.
-class ReservaSala(Servicio):
-    def calcular_costo(self, duracion, descuento=0, impuesto=0):
-        self.validar_parametros(duracion)
-        return costo_final(self.tarifa * duracion, descuento, impuesto)
-
-    def describir(self):
-        return f"Reserva de sala: {self.nombre} (${self.tarifa:.2f}/hora)"
+        return (
+            f"Reserva de sala: {self.nombre} "
+            f"(${self.tarifa:.2f}/hora)"
+        )
 
 
-# Servicio concreto 2: alquiler de equipos. Aplica tarifa por día.
 class AlquilerEquipo(Servicio):
+    """Servicio de alquiler de equipos por día."""
+
     def calcular_costo(self, duracion, descuento=0, impuesto=0):
+
         self.validar_parametros(duracion)
-        # La duración representa días de alquiler.
-        return costo_final(self.tarifa * duracion, descuento, impuesto)
+
+        return costo_final(
+            self.tarifa * duracion,
+            descuento,
+            impuesto
+        )
 
     def describir(self):
-        return f"Alquiler de equipo: {self.nombre} (${self.tarifa:.2f}/día)"
+        return (
+            f"Alquiler de equipo: {self.nombre} "
+            f"(${self.tarifa:.2f}/día)"
+        )
 
 
-# Servicio concreto 3: asesorías. Aplica tarifa por hora.
 class Asesoria(Servicio):
+    """Servicio de asesorías especializadas por hora."""
+
     def calcular_costo(self, duracion, descuento=0, impuesto=0):
+
         self.validar_parametros(duracion)
-        # La duración representa horas de asesoría.
-        return costo_final(self.tarifa * duracion, descuento, impuesto)
+
+        return costo_final(
+            self.tarifa * duracion,
+            descuento,
+            impuesto
+        )
 
     def describir(self):
-        return f"Asesoría especializada: {self.nombre} (${self.tarifa:.2f}/hora)"
+        return (
+            f"Asesoría especializada: {self.nombre} "
+            f"(${self.tarifa:.2f}/hora)"
+        )
+
 
 # --------------------------- SOBRECARGA SIMULADA ----------------------------
 # Python no permite sobrecarga clásica por firma. Se implementan variantes
