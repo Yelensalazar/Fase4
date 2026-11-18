@@ -492,48 +492,122 @@ class Reserva(Entidad):
         )
 
 # --------------------------- GESTOR EN MEMORIA ------------------------------
-# Gestor principal: mantiene listas en memoria, sin base de datos.
 class SistemaSoftwareFJ:
+    """Administra clientes, servicios y reservas en listas en memoria."""
+
     def __init__(self):
+
         self.clientes = []
         self.servicios = []
         self.reservas = []
-
-    # Registra clientes y evita identificadores repetidos.
+# Registra clientes y evita identificadores repetidos.
     def registrar_cliente(self, cliente):
+        
+
+        if not isinstance(cliente, Cliente):
+            raise ValidationError(
+                "Solo se pueden registrar objetos de tipo Cliente."
+            )
+
         if any(c.id == cliente.id for c in self.clientes):
-            raise ValidationError(f"Ya existe el cliente con ID {cliente.id}.")
+            raise ValidationError(
+                f"Ya existe el cliente con ID {cliente.id}."
+            )
+
         self.clientes.append(cliente)
+
         logger.info("Cliente registrado: %s", cliente.id)
 
-    # Registra servicios y evita identificadores repetidos.
     def registrar_servicio(self, servicio):
+        """Registra servicios y evita identificadores repetidos."""
+
+        if not isinstance(servicio, Servicio):
+            raise ValidationError(
+                "Solo se pueden registrar objetos de tipo Servicio."
+            )
+
         if any(s.id == servicio.id for s in self.servicios):
-            raise ValidationError(f"Ya existe el servicio con ID {servicio.id}.")
+            raise ValidationError(
+                f"Ya existe el servicio con ID {servicio.id}."
+            )
+
         self.servicios.append(servicio)
+
         logger.info("Servicio registrado: %s", servicio.id)
 
-    # Busca cliente y servicio en las listas; si existen, crea la reserva.
-    def crear_reserva(self, identificador, id_cliente, id_servicio, duracion):
-        cliente = next((c for c in self.clientes if c.id == str(id_cliente)), None)
-        servicio = next((s for s in self.servicios if s.id == str(id_servicio)), None)
+    def crear_reserva(
+        self,
+        identificador,
+        id_cliente,
+        id_servicio,
+        duracion
+    ):
+        """Busca cliente y servicio y crea una reserva."""
+
+        id_reserva = str(identificador).strip()
+        id_cliente = str(id_cliente).strip()
+        id_servicio = str(id_servicio).strip()
+
+        if not id_reserva:
+            raise ValidationError(
+                "El identificador de la reserva no puede estar vacío."
+            )
+
+        if any(r.id == id_reserva for r in self.reservas):
+            raise ValidationError(
+                f"Ya existe una reserva con ID {id_reserva}."
+            )
+
+        cliente = next(
+            (c for c in self.clientes if c.id == id_cliente),
+            None
+        )
+
+        servicio = next(
+            (s for s in self.servicios if s.id == id_servicio),
+            None
+        )
+
         if cliente is None:
-            raise NotFoundError(f"No existe el cliente {id_cliente}.")
+            raise NotFoundError(
+                f"No existe el cliente {id_cliente}."
+            )
+
         if servicio is None:
-            raise NotFoundError(f"No existe el servicio {id_servicio}.")
-        reserva = Reserva(identificador, cliente, servicio, duracion)
+            raise NotFoundError(
+                f"No existe el servicio {id_servicio}."
+            )
+
+        reserva = Reserva(
+            id_reserva,
+            cliente,
+            servicio,
+            duracion
+        )
+
         self.reservas.append(reserva)
+
         logger.info("Reserva creada: %s", reserva.id)
+
         return reserva
 
     def listar(self):
-        print("\\n--- CLIENTES ---")
-        for c in self.clientes: print(c.describir())
-        print("\\n--- SERVICIOS ---")
-        for s in self.servicios: print(s.describir())
-        print("\\n--- RESERVAS ---")
-        for r in self.reservas: print(r.describir())
+        """Muestra los clientes, servicios y reservas registrados."""
 
+        print("\n--- CLIENTES ---")
+
+        for cliente in self.clientes:
+            print(cliente.describir())
+
+        print("\n--- SERVICIOS ---")
+
+        for servicio in self.servicios:
+            print(servicio.describir())
+
+        print("\n--- RESERVAS ---")
+
+        for reserva in self.reservas:
+            print(reserva.describir())
 
 # --------------------------- DEMOSTRACIÓN (10+ OPERACIONES) ------------------
 # Ejecuta casos válidos e inválidos para demostrar que el programa continúa.
