@@ -15,6 +15,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(message)s",
     encoding="utf-8"
 )
+# Crea el registrador que utilizará el sistema Software FJ.
 logger = logging.getLogger("SoftwareFJ")
 # --------------------------- FUNCIONES DE VALIDACIÓN -------------------------
 
@@ -30,20 +31,54 @@ def validar_texto(valor, campo):
 
 # Comprueba que un valor sea numérico, finito y del tipo esperado.
 def validar_numero(valor, campo, permitir_cero=False):
-    if (
-        isinstance(valor, bool)
-        or not isinstance(valor, (int, float))
-        or not math.isfinite(valor)
-        or (valor < 0 if permitir_cero else valor <= 0)
-    ):
-        condicion = "no negativo" if permitir_cero else "positivo"
+    
+
+     # Rechaza valores booleanos y tipos que no sean numéricos.
+    # Se excluyen True y False porque Python los considera números.
+    if isinstance(valor, bool) or not isinstance(valor, (int, float)):
         raise ValidationError(
-            f"El valor de {campo} debe ser un número {condicion} y válido."
+            f"El campo {campo} debe ser numérico."
         )
-    return float(valor)
+
+    # Convierte el valor a número decimal.
+    # Si ocurre un error, se genera una excepción personalizada.
+    
+    try:
+        numero = float(valor)
+
+    except (ValueError, OverflowError) as exc:
+        raise ValidationError(
+            f"El campo {campo} contiene un número inválido."
+        ) from exc
+
+    # Comprueba que el número sea finito.
+    if not math.isfinite(numero):
+        raise ValidationError(
+            f"El campo {campo} debe ser un número finito."
+        )
+
+    # Comprueba si se permite cero o si debe ser positivo.
+    if permitir_cero:
+        if numero < 0:
+            raise ValidationError(
+                f"El campo {campo} no puede ser negativo."
+            )
+    elif numero <= 0:
+        raise ValidationError(
+            f"El campo {campo} debe ser positivo."
+        )
+
+    return numero
+
 
 def validar_porcentaje(valor, campo):
-    numero = validar_numero(valor, campo, permitir_cero=True)
+    """Valida que el porcentaje esté entre 0 y 100."""
+
+    numero = validar_numero(
+        valor,
+        campo,
+        permitir_cero=True
+    )
 
     if numero > 100:
         raise ValidationError(
