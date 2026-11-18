@@ -10,7 +10,8 @@ import math
 # Registro persistente de eventos y errores (no es almacenamiento de datos).
 # Configuración del log: se guarda en software_fj.log, con fecha, nivel y mensaje.
 logging.basicConfig(
-    filename="software_fj.log", level=logging.INFO,
+    filename="software_fj.log",
+    level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
     encoding="utf-8"
 )
