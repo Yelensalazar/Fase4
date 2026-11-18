@@ -117,9 +117,15 @@ class AvailabilityError(SoftwareFJError):
 # CLASE ABSTRACTA: define características comunes para Cliente, Servicio y Reserva.
 # ABC impide crear directamente objetos Entidad.
 class Entidad(ABC):
+    """Clase abstracta que establece características comunes."""
+
     def __init__(self, identificador):
-        if not str(identificador).strip():
-            raise ValidationError("El identificador no puede estar vacío.")
+
+        if identificador is None or not str(identificador).strip():
+            raise ValidationError(
+                "El identificador no puede estar vacío."
+            )
+
         self._id = str(identificador).strip()
 
     @property
@@ -128,7 +134,8 @@ class Entidad(ABC):
 
     @abstractmethod
     def describir(self):
-        """Cada entidad concreta debe describirse."""
+        """Cada entidad concreta debe implementar su descripción."""
+
 
 # --------------------------- CLIENTE ----------------------------------------
 # Cliente hereda el identificador de Entidad y agrega datos personales encapsulados.
