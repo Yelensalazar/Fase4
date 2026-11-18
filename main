@@ -155,9 +155,50 @@ class Cliente(Entidad):
 
     @staticmethod
     def _validar_correo(correo):
-        if not isinstance(correo, str) or "@" not in correo or "." not in correo.split("@")[-1]:
-            raise ValidationError("El correo electrónico no tiene un formato válido.")
-        return correo.strip().lower()
+
+        if not isinstance(correo, str):
+            raise ValidationError("El correo debe ser texto.")
+
+        correo = correo.strip().lower()
+        partes = correo.split("@")
+
+        if len(partes) != 2:
+            raise ValidationError(
+                "El correo no tiene un formato válido."
+            )
+
+        usuario, dominio = partes
+
+        if (
+            not usuario
+            or not dominio
+            or "." not in dominio
+            or dominio.startswith(".")
+            or dominio.endswith(".")
+        ):
+            raise ValidationError(
+                "El correo no tiene un formato válido."
+            )
+
+        return correo
+
+    @staticmethod
+    def _validar_telefono(telefono):
+
+        if not isinstance(telefono, str):
+            raise ValidationError("El teléfono debe ser texto.")
+
+        telefono = telefono.strip()
+
+        # Permite espacios y guiones como separadores.
+        digitos = telefono.replace(" ", "").replace("-", "")
+
+        if not digitos.isdigit() or not 7 <= len(digitos) <= 15:
+            raise ValidationError(
+                "El teléfono debe contener entre 7 y 15 dígitos."
+            )
+
+        return telefono
 
     @property
     def nombre(self):
@@ -172,7 +213,11 @@ class Cliente(Entidad):
         return self.__telefono
 
     def describir(self):
-        return f"Cliente {self.id}: {self.nombre} | {self.correo} | {self.telefono}"
+        return (
+            f"Cliente {self.id}: {self.nombre} | "
+            f"{self.correo} | {self.telefono}"
+        )
+
 
 # --------------------------- SERVICIOS --------------------------------------
 # Servicio es abstracta: establece una estructura común para los tipos de servicio.
